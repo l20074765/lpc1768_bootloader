@@ -95,15 +95,15 @@ typedef enum IRQn
 
 
 #define __IO	volatile
-#define __O	volatile
-#define __I	volatile
+#define __O		volatile
+#define __I		volatile const 
 
 
 /******************************************************************************/
 /*                Device Specific Peripheral registers structures             */
 /******************************************************************************/
 
-#pragma anon_unions
+
 
 /*------------- System Control (SC) ------------------------------------------*/
 typedef struct
@@ -462,12 +462,12 @@ typedef struct
        uint8  RESERVED7[3];
   __IO uint8  DOW;
        uint8  RESERVED8[3];
-  __IO uint16_t DOY;
-       uint16_t RESERVED9;
+  __IO uint16 DOY;
+       uint16 RESERVED9;
   __IO uint8  MONTH;
        uint8  RESERVED10[3];
-  __IO uint16_t YEAR;
-       uint16_t RESERVED11;
+  __IO uint16 YEAR;
+       uint16 RESERVED11;
   __IO uint32 CALIBRATION;
   __IO uint32 GPREG0;
   __IO uint32 GPREG1;
@@ -488,12 +488,12 @@ typedef struct
        uint8  RESERVED17[3];
   __IO uint8  ALDOW;
        uint8  RESERVED18[3];
-  __IO uint16_t ALDOY;
-       uint16_t RESERVED19;
+  __IO uint16 ALDOY;
+       uint16 RESERVED19;
   __IO uint8  ALMON;
        uint8  RESERVED20[3];
-  __IO uint16_t ALYEAR;
-       uint16_t RESERVED21;
+  __IO uint16 ALYEAR;
+       uint16 RESERVED21;
 } LPC_RTC_TypeDef;
 
 /*------------- Watchdog Timer (WDT) -----------------------------------------*/
@@ -532,7 +532,7 @@ typedef struct
 {
   __IO uint32 DACR;
   __IO uint32 DACCTRL;
-  __IO uint16_t DACCNTVAL;
+  __IO uint16 DACCNTVAL;
 } LPC_DAC_TypeDef;
 
 /*------------- Motor Control Pulse-Width Modulation (MCPWM) -----------------*/
@@ -845,7 +845,7 @@ typedef struct
   __IO uint32 Module_ID;
 } LPC_EMAC_TypeDef;
 
-#pragma no_anon_unions
+
 
 
 /******************************************************************************/
