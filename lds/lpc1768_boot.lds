@@ -17,6 +17,11 @@ SECTIONS
 	{
 		*(.vectors) /* ÏòÁ¿±í*/
 	} >NVM
+	.crp 0x1FC :AT(0x1FC)
+	{
+		 *(.crp) 
+		 *(.crp*)
+	} >NVM
 	.text :
 	{
 		*(.text)

@@ -152,6 +152,8 @@ void LPC_start(void)
 {
 	LPC_systemInit();
 	uart0_init();
+
+	
 	main();
 }
 
