@@ -47,37 +47,22 @@ include $(TOPDIR)/config.mk
 #-------------------------------------------------------------------------------
 # Configure the include directories
 #-------------------------------------------------------------------------------
-INCS  = -I$(TOPDIR) 			\
-		-I$(GNU_DIR)/include 	\
+INCS  = -I$(TOPDIR) 				\
+		-I$(GNU_DIR)/include 		\
+		-I$(TOPDIR)/src/startup	\
+		-I$(TOPDIR)/src/common		\
+		-I$(TOPDIR)/src/dirvers	\
+		-I$(TOPDIR)/src/api		\
+		-I$(TOPDIR)/src/app		\
 
 
-#-------------------------------------------------------------------------------
-# Configure the newlib Embedded C runtime
-#-------------------------------------------------------------------------------
-STDLIB = $(GNU_DIR)/lib/libc.a
-
-
-
-#-------------------------------------------------------------------------------
-# Configure source code dirctories
-#-------------------------------------------------------------------------------
-SRC_DIRS = $(TOPDIR)/src/startup    \
-		$(TOPDIR)/src/dirvers		\
-		$(TOPDIR)/src/api			\
-		$(TOPDIR)/src/app			\
-     	 
-    	
-  
-
-#-fno-common 表示不将未初始化的全局变量 仍然放入BSS段 -O -fsigned-char -fno-common
-CFLAGS :=  -Wall -c -g2 -mcpu=cortex-m3 -mthumb -fno-common
-SFLAGS:= -mcpu=cortex-m3 -mthumb
-LDFLAGS:= -T $(TOPDIR)/lds/lpc1768_boot.lds
-
-
-
-
+SRC_DIRS=$(TOPDIR)/src/startup	\
+		$(TOPDIR)/src/common	\
+		$(TOPDIR)/src/dirvers	\
+		$(TOPDIR)/src/api	\
+		$(TOPDIR)/src/app	\
 		
+     	 
 
 
 #-------------------------------------------------------------------------------
@@ -92,6 +77,26 @@ SRC_APP=$(wildcard $(TOPDIR)/src/startup/*.s)	\
 
 OBJS  = $(patsubst %.c, $(OBJ_DIR)/%.o, $(SRC_APP)) 
 	
+
+
+#-------------------------------------------------------------------------------
+# Configure the newlib Embedded C runtime
+#-------------------------------------------------------------------------------
+STDLIB = $(GNU_DIR)/lib/libc.a
+  
+
+#-fno-common 表示不将未初始化的全局变量 仍然放入BSS段 -O -fsigned-char -fno-common
+CFLAGS :=  -Wall -c -g2 -mcpu=cortex-m3 -mthumb -fno-common
+SFLAGS:= -mcpu=cortex-m3 -mthumb
+LDFLAGS:= -T $(TOPDIR)/lds/lpc1768_boot.lds
+
+
+
+
+		
+
+
+
 	
 	
 

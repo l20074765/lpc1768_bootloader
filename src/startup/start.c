@@ -14,7 +14,9 @@
 ##        Date   :     2015.04.29
 ##==========================================================================*/
 
-extern int main(void);
+
+
+extern void LPC_start(void);
 
 void _start(void);
 void default_isr(void);
@@ -82,7 +84,7 @@ void _start(void)
 	for(i = 0;i < len;i++){
 		*dst++ = 0;
 	}
-	main();
+	LPC_start();
 	
 
 }
