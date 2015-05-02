@@ -1,6 +1,6 @@
 #include "board.h"
 #include "config.h"
-
+#include "uart0.h"
 
 extern int main(void);
 
@@ -8,12 +8,12 @@ extern int main(void);
 
 #define CLOCK_SETUP           1
 #define SCS_Val               0x00000020
-#define CLKSRCSEL_Val         0x00000001
+#define CLKSRCSEL_Val         0x00000001	//选择主振荡器作为PLL0时钟源
 #define PLL0_SETUP            1
 #define PLL0CFG_Val           0x0000000B
 #define PLL1_SETUP            1
 #define PLL1CFG_Val           0x00000023
-#define CCLKCFG_Val           0x00000003
+#define CCLKCFG_Val           0x00000003	//CCLK 为 PLL0 4分频
 #define USBCLKCFG_Val         0x00000000
 #define PCLKSEL0_Val          0x00000000
 #define PCLKSEL1_Val          0x00000000
@@ -21,17 +21,11 @@ extern int main(void);
 #define CLKOUTCFG_Val         0x00000000
 
 #define FLASH_SETUP           1
-#define FLASHCFG_Val          0x0000303A
+#define FLASHCFG_Val          0x0000503A
 
 
 
-/*----------------------------------------------------------------------------
-  Define clocks
- *----------------------------------------------------------------------------*/
-#define XTAL        (12000000UL)        /* Oscillator frequency               */
-#define OSC_CLK     (      XTAL)        /* Main oscillator frequency          */
-#define RTC_CLK     (   32000UL)        /* RTC oscillator frequency           */
-#define IRC_OSC     ( 4000000UL)        /* Internal RC oscillator frequency   */
+
 
 
 /*----------------------------------------------------------------------------
@@ -49,14 +43,17 @@ void LPC_systemInit (void)
     while ((LPC_SC->SCS & (1<<6)) == 0);/* Wait for Oscillator to be ready    */
   }
 
-  LPC_SC->CCLKCFG   = CCLKCFG_Val;      /* Setup Clock Divider                */
+  LPC_SC->CCLKCFG   = (FCCO / FCCLK) - 1;      /* Setup Clock Divider                */
 
+  //关闭所有外设
   LPC_SC->PCLKSEL0  = PCLKSEL0_Val;     /* Peripheral Clock Selection         */
   LPC_SC->PCLKSEL1  = PCLKSEL1_Val;
 
 #if (PLL0_SETUP)
+  //FCCO =（2×M×FIN）/ N  = 2 * 12 * FIN / 1 = 24 * 12000000UL
   LPC_SC->CLKSRCSEL = CLKSRCSEL_Val;    /* Select Clock Source for PLL0       */
-  LPC_SC->PLL0CFG   = PLL0CFG_Val;
+
+  LPC_SC->PLL0CFG   = (((PLL_NVALUE - 1) << 16) | (PLL_MVALUE - 1));    //M = 11+ 1  N =0 + 1
   LPC_SC->PLL0CON   = 0x01;             /* PLL0 Enable                        */
   LPC_SC->PLL0FEED  = 0xAA;
   LPC_SC->PLL0FEED  = 0x55;
@@ -81,7 +78,8 @@ void LPC_systemInit (void)
   LPC_SC->USBCLKCFG = USBCLKCFG_Val;    /* Setup USB Clock Divider            */
 #endif
 
-  LPC_SC->PCONP     = PCONP_Val;        /* Power Control for Peripherals      */
+ //关闭所有外设 除了GPIO
+  LPC_SC->PCONP     = (0x01UL << 15);        /* Power Control for Peripherals      */
 
   LPC_SC->CLKOUTCFG = CLKOUTCFG_Val;    /* Clock Output Configuration         */
 #endif
@@ -125,7 +123,27 @@ void LPC_systemInit (void)
   }
 
 #if (FLASH_SETUP == 1)                  /* Flash Accelerator Setup            */
-  LPC_SC->FLASHCFG  = FLASHCFG_Val;
+ 
+#if FCCLK <= 20000000
+    LPC_SC->FLASHCFG = ((0x01ul << 12) & (~(0x003f))) | 0x003a;                 /*  Flash访问使用1个CPU时钟     */
+#endif                                                                  /*  FCCLK                       */
+
+#if FCCLK > 20000000 && FCCLK <= 40000000
+    LPC_SC->FLASHCFG = ((0x02ul << 12) & (~(0x003f))) | 0x003a;                 /*  Flash访问使用2个CPU时钟     */
+#endif                                                                  /*  FCCLK                       */
+
+#if FCCLK > 40000000 && FCCLK <= 60000000
+    LPC_SC->FLASHCFG = ((0x03ul << 12) & (~(0x003f))) | 0x003a;                 /*  Flash访问使用3个CPU时钟     */
+#endif                                                                  /*  FCCLK                       */
+
+#if FCCLK > 60000000 && FCCLK <= 80000000
+    LPC_SC->FLASHCFG = ((0x04ul << 12) & (~(0x003f))) | 0x003a;                 /*  Flash访问使用4个CPU时钟     */
+#endif                                                                  /*  FCCLK                       */
+
+#if FCCLK > 80000000 && FCCLK <= 100000000
+    LPC_SC->FLASHCFG = ((0x05ul << 12) & (~(0x003f))) | 0x003a;                 /*  Flash访问使用5个CPU时钟     */
+#endif       
+
 #endif
 }
 
@@ -133,6 +151,7 @@ void LPC_systemInit (void)
 void LPC_start(void)
 {
 	LPC_systemInit();
+	uart0_init();
 	main();
 }
 

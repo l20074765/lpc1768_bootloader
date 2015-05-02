@@ -49,18 +49,18 @@ include $(TOPDIR)/config.mk
 #-------------------------------------------------------------------------------
 INCS  = -I$(TOPDIR) 				\
 		-I$(GNU_DIR)/include 		\
-		-I$(TOPDIR)/src/startup	\
+		-I$(TOPDIR)/src/startup		\
 		-I$(TOPDIR)/src/common		\
-		-I$(TOPDIR)/src/dirvers	\
-		-I$(TOPDIR)/src/api		\
-		-I$(TOPDIR)/src/app		\
+		-I$(TOPDIR)/src/drivers		\
+		-I$(TOPDIR)/src/api			\
+		-I$(TOPDIR)/src/app			\
 
 
-SRC_DIRS=$(TOPDIR)/src/startup	\
-		$(TOPDIR)/src/common	\
-		$(TOPDIR)/src/dirvers	\
-		$(TOPDIR)/src/api	\
-		$(TOPDIR)/src/app	\
+SRC_DIRS=$(TOPDIR)/src/startup		\
+		$(TOPDIR)/src/common		\
+		$(TOPDIR)/src/drivers		\
+		$(TOPDIR)/src/api			\
+		$(TOPDIR)/src/app			\
 		
      	 
 
@@ -70,7 +70,7 @@ SRC_DIRS=$(TOPDIR)/src/startup	\
 #-------------------------------------------------------------------------------
 SRC_APP=$(wildcard $(TOPDIR)/src/startup/*.s)	\
 	$(wildcard $(TOPDIR)/src/startup/*.c)	\
-	$(wildcard $(TOPDIR)/src/dirvers/*.c)	\
+	$(wildcard $(TOPDIR)/src/drivers/*.c)	\
 	$(wildcard $(TOPDIR)/src/api/*.c)	\
 	$(wildcard $(TOPDIR)/src/app/*.c)	\
 
@@ -82,7 +82,7 @@ OBJS  = $(patsubst %.c, $(OBJ_DIR)/%.o, $(SRC_APP))
 #-------------------------------------------------------------------------------
 # Configure the newlib Embedded C runtime
 #-------------------------------------------------------------------------------
-STDLIB = $(GNU_DIR)/lib/libc.a
+STDLIB = $(GNU_DIR)/lib/thumb2/libc.a
   
 
 #-fno-common 表示不将未初始化的全局变量 仍然放入BSS段 -O -fsigned-char -fno-common

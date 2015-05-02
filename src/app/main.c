@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include "uart0.h"
+
 
 #define FIO2DIR                 (*(volatile unsigned long *)0x2009c040)
 #define FIO2SET                 (*(volatile unsigned long *)0x2009c058)
@@ -10,7 +12,7 @@ void delay(unsigned int ms)
 {
 	unsigned int i,j;
 	for(i = 0;i < ms;i++)
-		for(j = 0;j < 1000;j++);
+		for(j = 0;j < 10000;j++);
 }
 
 int main(void)
@@ -21,6 +23,7 @@ int main(void)
 		delay(100);
 		FIO2CLR |= (7 << 5);
 		delay(100);
+		uart0_putStr("Hello....\r\n",sizeof("Hello....\r\n"));
 	}
 	return 0;
 }
