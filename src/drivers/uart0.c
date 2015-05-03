@@ -19,7 +19,7 @@
 #include <string.h>
 
 #define	_DEBUG_TRACE
-#define	UART0_BPS			9600
+//#define	UART0_BPS			9600
 #define	UART0_BUF_LEN		128
 
 volatile uint8 uart0_buf[UART0_BUF_LEN];
@@ -33,7 +33,7 @@ volatile uint8 uart0_wr;
 ** output parameters:   无
 ** Returned value:      无
 *********************************************************************************************************/
-void uart0_init (void)
+void uart0_init (uint32 baud)
 {
     uint32 ulFdiv; 
 	LPC_SC->PCONP  |= (1 << 3);              	/* Enable power to Uart0 block  */
@@ -41,7 +41,7 @@ void uart0_init (void)
 	LPC_PINCON->PINSEL0 |= (0x01 << 6) | (0x01 << 4); //配置管脚为串口功能
 	LPC_PINCON->PINMODE0 &= ~(0x0F << 4); //上拉 
     LPC_UART0->LCR = 0x83;                                                  //允许设置波特率
-    ulFdiv = (FPCLK / 16) / UART0_BPS;                              //设置波特率
+    ulFdiv = (FPCLK / 16) / baud;                              //设置波特率
     LPC_UART0->DLM  = ulFdiv / 256;
     LPC_UART0->DLL  = ulFdiv % 256; 
     LPC_UART0->LCR  = 0x03;                                                  //锁定波特率

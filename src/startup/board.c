@@ -1,6 +1,6 @@
 #include "board.h"
 #include "config.h"
-#include "uart0.h"
+
 
 extern int main(void);
 
@@ -150,10 +150,6 @@ void LPC_systemInit (void)
 
 void LPC_start(void)
 {
-	LPC_systemInit();
-	uart0_init();
-
-	
 	main();
 }
 

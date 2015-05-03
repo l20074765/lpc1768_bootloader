@@ -22,7 +22,7 @@
 
 #include "common.h"
 
-void uart0_init (void);
+void uart0_init (uint32 baud);
 void uart0_isrHandler(void);
 void uart0_putChar(uint8 ch);
 void uart0_putStr(uint8 *str, uint32 len);

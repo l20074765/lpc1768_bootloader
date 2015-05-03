@@ -28,6 +28,6 @@
 #define PLL_MVALUE                ((FCCO / FOSC) * (PLL_NVALUE) / 2)    /*  6~512                       */
 
 
-
+void LPC_systemInit (void);
 
 #endif
