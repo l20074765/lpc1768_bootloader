@@ -125,29 +125,30 @@ void disable_timer( uint8 timerId )
 
 uint32 timer_init(uint8 timerId, uint32 TimerInterval ) 
 {
-  switch( timerId ){
-	case DEV_TIMER_0:{
-		DEV_Timer0.counter = 0;
-		LPC_TIM0->MR0 = TimerInterval;
-		LPC_TIM0->MCR = 3;				/* Interrupt and Reset on MR0 */
-
-		NVIC_EnableIRQ(TIMER0_IRQn);
-
-		LPC_TIM0->TCR  = 0x01;
-		return (1);
+ 	uint8 res = 0;
+	switch( timerId ){
+		case DEV_TIMER_0:{
+			LPC_SC->PCONP  |= (0x01 << 1); //enable timer0 power      
+			DEV_Timer0.counter = 0;
+			LPC_TIM0->MR0 = TimerInterval;
+			LPC_TIM0->MCR = 3;				
+			NVIC_EnableIRQ(TIMER0_IRQn);
+			LPC_TIM0->TCR  = 0x01;
+			res = 1;
+		}
+		case DEV_TIMER_1:{
+			LPC_SC->PCONP  |= (0x01 << 2); //enable timer1 power      
+			DEV_Timer1.counter = 0;
+			LPC_TIM1->MR0 = TimerInterval;
+			LPC_TIM1->MCR = 3;				
+			NVIC_EnableIRQ(TIMER1_IRQn);
+			LPC_TIM1->TCR = 0x01;
+			res = 1;
+		}
+		default:break;
 	}
-	case DEV_TIMER_1:{
-		 DEV_Timer1.counter = 0;
-		LPC_TIM1->MR0 = TimerInterval;
-		LPC_TIM1->MCR = 3;				/* Interrupt and Reset on MR1 */
-
-		NVIC_EnableIRQ(TIMER1_IRQn);
-		LPC_TIM1->TCR = 0x01;
-
-		return (1);
-	}
-  }
-  return (0);
+	
+	return res;
 }
 
 

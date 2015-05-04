@@ -21,7 +21,7 @@ int main(void)
 {
 	LPC_systemInit();
 	uart0_init(9600);
-	//timer_init( DEV_TIMER_0, FPCLK/100 ); // FPCLK/1000 10ms定时器  FPCLK = 24000000
+	timer_init( DEV_TIMER_0, FPCLK/100 ); // FPCLK/1000 10ms定时器  FPCLK = 24000000
 
 	FIO2DIR |= (7 << 5);
 	while(1){
