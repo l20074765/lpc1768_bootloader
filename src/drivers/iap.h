@@ -13,7 +13,7 @@ extern const uint32 crp;
 #define NOCRP 	0x11223344
 
 #define CRP 	NOCRP
-
+#define IAP_FCCLK            (25000)
 #define IAP_ADDRESS		0x1FFF1FF1	//IAPÈë¿ÚµØÖ·
 
 
@@ -31,15 +31,14 @@ typedef enum{
 
 
 #define FLASH_BUF_SIZE 		256
-#define CCLK 48000 					/* 48,000 KHz for IAP call */
 
-
+#define	IAP_BUF_LENGTH		(4096UL)
 
 
 #define CMD_SUCCESS 0
 
 
-#define USER_START_SECTOR 	6
+#define USER_START_SECTOR 	8
 #define MAX_USER_SECTOR 	29
 #define USER_FLASH_START 	(sector_start_map[USER_START_SECTOR])
 #define USER_FLASH_END	 	(sector_end_map[MAX_USER_SECTOR])
@@ -114,8 +113,9 @@ typedef enum{
 #define SECTOR_28_END       0x00077FFF
 #define SECTOR_29_END       0x0007FFFF
 
+void IAP_prepare_sector(uint32 start_sector,uint32 end_sector);
+void IAP_erase_sector(uint32 start_sector,uint32 end_sector);
 
-
-
-
+uint32 IAP_write_flash(uint32 * dst, uint8 * src, uint32 no_of_bytes);
+void IAP_execute_user_code(void);
 #endif

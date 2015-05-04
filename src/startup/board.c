@@ -37,6 +37,7 @@ uint32 SystemFrequency = IRC_OSC; /*!< System Clock Frequency (Core Clock)  */
 
 void LPC_systemInit (void)
 {
+	//__disable_irq();
 #if (CLOCK_SETUP)                       /* Clock Setup                        */
   LPC_SC->SCS       = SCS_Val;
   if (SCS_Val & (1 << 5)) {             /* If Main Oscillator is enabled      */
@@ -145,6 +146,8 @@ void LPC_systemInit (void)
 #endif       
 
 #endif
+
+	//__enable_irq();
 }
 
 

@@ -20,7 +20,7 @@
 
 #define	_DEBUG_TRACE
 //#define	UART0_BPS			9600
-#define	UART0_BUF_LEN		128
+#define	UART0_BUF_LEN		1048
 
 volatile uint8 uart0_buf[UART0_BUF_LEN];
 volatile uint8 uart0_rd;
@@ -47,6 +47,9 @@ void uart0_init (uint32 baud)
     LPC_UART0->LCR  = 0x03;                                                  //锁定波特率
     LPC_UART0->FCR  = 0x87;                                                  //使能FIFO，设置8个字节触发点
     LPC_UART0->IER  = 0x01;                                                  //使能接收中断
+
+	NVIC_EnableIRQ(UART0_IRQn);
+
 	uart0_rd  = 0;
 	uart0_wr  = 0;
 	memset((void *)uart0_buf,0x00,UART0_BUF_LEN);				//初始化缓冲区
@@ -61,49 +64,33 @@ void uart0_init (uint32 baud)
 *********************************************************************************************************/
 void uart0_isrHandler (void)
 {
-	#if 0
-	unsigned char Num;
-	unsigned char rxd_head;
-	unsigned char rxd_data;
-	
-	//OS_ENTER_CRITICAL();
-	OSIntEnter();      
-    while((U0IIR & 0x01) == 0)                          			//判断是否有中断挂起
+
+	uint8 i,temp;
+	//__disable_irq();      
+    while((LPC_UART0->IIR & 0x01) == 0)                          			//判断是否有中断挂起
 	{
-        switch(U0IIR & 0x0E) 										//判断中断标志
+        switch(LPC_UART0->IIR & 0x0E) 										//判断中断标志
 		{                                         
-            case 0x04 : for (Num = 0; Num < 8; Num++)				//接收数据中断
+            case 0x04 : for (i = 0; i < 8; i++)				//接收数据中断
 						{
-		                	rxd_data = U0RBR;
-							rxd_head = (Uart0RxdHead + 1);
-					        if( rxd_head >= UART0BUFFERLEN ) 
-					           	rxd_head = 0;
-					        if( rxd_head != Uart0RxdTail) 
-					        {
-					           	Uart0RevBuff[Uart0RxdHead] = rxd_data;
-					           	Uart0RxdHead = rxd_head;
-					        }
+		                	temp = LPC_UART0->RBR;
+							uart0_buf[uart0_wr++] = temp;
+							uart0_wr = uart0_wr % UART0_BUF_LEN;
 		                }
 		                break;
-            case 0x0C : while((U0LSR & 0x01) == 0x01)				//字符超时中断，判断数据是否接收完毕
+            case 0x0C : while((LPC_UART0->LSR & 0x01) == 0x01)				//字符超时中断，判断数据是否接收完毕
 						{                         
-		                	rxd_data = U0RBR;
-							rxd_head = (Uart0RxdHead + 1);
-					        if( rxd_head >= UART0BUFFERLEN ) 
-					           	rxd_head = 0;
-					        if( rxd_head != Uart0RxdTail) 
-					        {
-					           	Uart0RevBuff[Uart0RxdHead] = rxd_data;
-					           	Uart0RxdHead = rxd_head;
-					        }
+		                	temp = LPC_UART0->RBR;
+							uart0_buf[uart0_wr++] = temp;
+					       	uart0_wr = uart0_wr % UART0_BUF_LEN;
 		                }
 		                break;
             default	: break;
         }
     }
-    OSIntExit();
-    //OS_EXIT_CRITICAL();
-	#endif
+   // __enable_irq();
+  
+
 }
 /*********************************************************************************************************
 ** Function name:	    uart0_putChar
