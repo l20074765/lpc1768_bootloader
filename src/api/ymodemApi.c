@@ -22,20 +22,22 @@ uint32		DownCheckSum,FlashCheckSum;
 static	uint16 		recvcnt = 0;
 static	uint8		recvbuf[YMODEM_BUF_SIZE];
 
+static	uint8		wrFlashBuf[1024];
+static	uint16		wrFlashIndex = 0;
+
+
 uint8	    GucIapTmp[ IAP_BUF_LENGTH ] = "";
 uint32      IAP_Flash_Address    = 0x00006000;
-
-
 
 //清除扇区
 void SetFlashBlank( void )
 {
+	uint8 i;
+	__disable_irq();
+	IAP_prepare_sector( USER_START_SECTOR, MAX_USER_SECTOR);
 
 	
-	__disable_irq();
 	
-	IAP_prepare_sector( USER_START_SECTOR, MAX_USER_SECTOR);
-	IAP_erase_sector( USER_START_SECTOR, MAX_USER_SECTOR );
 	IAP_Flash_Address = USER_FLASH_START;
 	__enable_irq();
 	
@@ -47,6 +49,7 @@ void SetFlashBlank( void )
 //将数据写入flash
 uint8 IAPWriteData( uint8 *dataSrc, uint32 dataLen )
 {
+	uint8 i;
 	uint32    writelen = IAP_BUF_LENGTH;
 	
 	__disable_irq();
@@ -70,6 +73,9 @@ uint8 IAPWriteData( uint8 *dataSrc, uint32 dataLen )
 	
 	IAP_prepare_sector(USER_START_SECTOR, MAX_USER_SECTOR);
 	IAP_write_flash((uint32 *)IAP_Flash_Address,(uint8 *)GucIapTmp, writelen); // 写数据到扇区
+
+	
+
 
 	__enable_irq();
 
@@ -146,117 +152,6 @@ void	Tx_HEX_U32(uint32 j)
 }
 
 
-uint8	UART1_Download(void)
-{
-	uint16	i;
-	uint8	j;
-	
-	uart0_putStr("\r\n\r\n Waiting for the file to be sent ...\r\n",
-		sizeof("\r\n\r\n Waiting for the file to be sent ...\r\n"));
-	
-	Y_TimeOut = 0;
-	packets_received = 0;
-	session_begin = 0;
-	WaitTime = 400;
-	DownCheckSum = 0;
-	
-	while(WaitTime > 0)
-	{
-		if(Y_TimeOut == 0)
-		{
-			uart0_putChar(CRC16);
-			Y_TimeOut = 3000;
-			if(WaitTime > 0) WaitTime--;
-		}
-
-		while(Y_TimeOut > 0)
-		{
-			UART1_RxPackage();
-			if(RxCnt == 0)	Y_TimeOut--;
-			else
-			{
-				if(RxCnt == 1)
-				{
-					if(recvbuf[0] == EOT)	
-					{
-						uart0_putChar(ACK);
-						Y_TimeOut = 400;
-					}
-					else if((recvbuf[0] == ABORT1) || (recvbuf[0] == ABORT2))	
-					{
-						return 1;   
-					}
-				}
-				else if(RxCnt <= 5)	
-				{
-					if((recvbuf[0] == CANCEL) && (recvbuf[1] == CANCEL))	
-					{
-						return 2;	
-					}
-				}
-				else if((RxCnt == 133) || (RxCnt == 1029))	
-				{
-					if (recvbuf[PACKET_SEQNO_INDEX] != (recvbuf[PACKET_SEQNO_COMP_INDEX] ^ 0xff))	//?D??·￠?íDòo?ê?·??yè·
-					{
-						uart0_putChar(NAK);	
-						Y_TimeOut = 3000;
-					}
-					else
-					{
-						WaitTime = 50;
-						if (packets_received == 0)	
-						{
-							if (recvbuf[PACKET_HEADER] != 0)  
-							{
-								for (i = 0; i < FILE_NAME_LENGTH; i++)	file_name[i] = 0;
-								for (i = 0; i < FILE_SIZE_LENGTH; i++)	file_size[i] = 0;
-								j = PACKET_HEADER;
-								for (i = 0; (i < FILE_NAME_LENGTH) && (recvbuf[j] != 0); i++)
-									file_name[i] = recvbuf[j++];		
-
-								for (i=0, j++; (recvbuf[j] != ' ') && (i < FILE_SIZE_LENGTH); i++)
-									file_size[i] = recvbuf[j++];	
-								FileLength = Str2Int(file_size);	
-
-								//清除扇区
-								SetFlashBlank();
-							
-								uart0_putChar(ACK);
-								Y_TimeOut = 400;
-								packets_received ++;
-								session_begin = 1;
-								FlashDestination = 0;
-								DownCheckSum = 0;
-							}
-						}
-
-						
-						else if(session_begin == 1)
-						{
-							if(recvbuf[PACKET_SEQNO_INDEX] == 0)	//è?0êy?Y??
-							{
-								uart0_putChar(ACK);
-								return 0;
-							}
-							else	//êy?Y??
-							{
-								RxCnt -= 5;
-								IAPWriteData(&recvbuf[3], RxCnt);
-			
-								uart0_putChar(ACK);
-								Y_TimeOut = 3000;
-								packets_received ++;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	return 100;	//????′í?ó
-}
-
-
 
 void	ReturnNameAndLength(void)
 {
@@ -274,7 +169,7 @@ void	ReturnNameAndLength(void)
 	uart0_putStr(" Bytes\r\n DownChexkSum:  ",
 		sizeof(" Bytes\r\n DownChexkSum:  "));
 	Tx_HEX_U32(DownCheckSum);
-	uart0_putStr("\r\n ISP Versiom:   2013-4-29 by Coody",
+	uart0_putStr("\r\n ISP Versiom:   2015-5-05 by Yoc   ",
 		sizeof("\r\n ISP Versiom:   2013-4-29 by Coody"));
 	uart0_putStr("\r\n================================\r\n\r\n",
 		sizeof("\r\n================================\r\n\r\n"));
@@ -298,9 +193,9 @@ uint8 uart1GetCh(uint8 *ch,uint16 timeout) //ms
 	return 0;
 }
 
-#define YStart		0
+#define YStart			0
 #define YDataTrans		1
-#define YEOT		2
+#define YEOT			2
 
 #define Y_TIMEOUT   100
 
@@ -332,12 +227,27 @@ uint8 uart_download(void)
 							recvbuf[i] = ch;
 						}
 					}
+
+					memset(file_name,0,sizeof(file_name));
+					for(i = 0;i < recvlen;i++){
+						if(recvbuf[i] == 0){
+							break;
+						}
+						else{
+							file_name[i] = ch;
+							FileLength = i + 1;
+						}
+					}
+					
 					//接收校验码 暂不校验
 					res = uart1GetCh(&ch,Y_TIMEOUT);
 					res = uart1GetCh(&ch,Y_TIMEOUT);
 					
+					
 					//调用子程序
 					SetFlashBlank();
+					wrFlashIndex = 0;
+					memset(wrFlashBuf,0,sizeof(wrFlashBuf));
 					uart0_putChar(ACK);//擦除完成 发送确认信号
 					ymodemState=YDataTrans;//切换为数据接收状态
 					uart0_putChar(CRC16); //在发送C 正式启动数据传输
@@ -361,6 +271,10 @@ uint8 uart_download(void)
 			}
 			if(ch == EOT){//收到EOT, 结束
 				ymodemState = YEOT;
+				if(wrFlashIndex > 0){
+					IAPWriteData(wrFlashBuf, 256);
+					wrFlashIndex == 0;
+				}
 				uart0_putChar(ACK);
 			}
 			else if(ch == SOH || ch == STX){ //接收数据包
@@ -374,7 +288,16 @@ uint8 uart_download(void)
 				res = uart1GetCh(&ch,Y_TIMEOUT);//crc
 				res = uart1GetCh(&ch,Y_TIMEOUT);
 				//处理数据包
-				IAPWriteData(&recvbuf[0], recvlen);
+				for(i = 0;i < recvlen;i++){
+					wrFlashBuf[wrFlashIndex++] = recvbuf[i];
+					if(wrFlashIndex >= 256){
+						IAPWriteData(wrFlashBuf, 256);
+						memset(wrFlashBuf,0,1024);
+						wrFlashIndex = 0;
+					}
+				}
+				
+				
 				uart0_putChar(ACK);//保存完成 发送确认信号
 			}
 			else if(ch == CANCEL){

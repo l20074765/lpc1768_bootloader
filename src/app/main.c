@@ -43,9 +43,12 @@ int main(void)
 		res = uart_download();
 		if(res == 1)
 		{
+			delayMs(1000);
 			uart0_putStr("\r\n\r\n Programming Completed Successfully!\r\n",
 				sizeof("\r\n\r\n Programming Completed Successfully!\r\n"));
 			ReturnNameAndLength();
+			uart0_putStr("Yoc...\r\n",sizeof("Yoc...\r\n"));
+			__disable_irq();
 			IAP_execute_user_code();
 		}
 		else{

@@ -13,7 +13,7 @@ extern const uint32 crp;
 #define NOCRP 	0x11223344
 
 #define CRP 	NOCRP
-#define IAP_FCCLK            (25000)
+#define IAP_FCCLK            (96000)
 #define IAP_ADDRESS		0x1FFF1FF1	//IAPÈë¿ÚµØÖ·
 
 
@@ -36,6 +36,27 @@ typedef enum{
 
 
 #define CMD_SUCCESS 0
+#define 	INVALID_COMMAND	1
+#define 	SRC_ADDR_ERROR	2
+#define 	DST_ADDR_ERROR	3
+#define 	SRC_ADDR_NOT_MAPPED		4
+
+#define 	DST_ADDR_NOT_MAPPED	5
+
+
+#define 	COUNT_ERROR	6
+
+
+#define 	INVALID_SECTOR	7
+
+
+#define 	SECTOR_NOT_BLANK	8
+#define 	SECTOR_NOT_PREPARED_FOR_WRITE_OPERATION	9
+	
+#define 	COMPARE_ERROR	10
+
+
+#define 	BUSY		11
 
 
 #define USER_START_SECTOR 	8
@@ -112,6 +133,10 @@ typedef enum{
 #define SECTOR_27_END       0x0006FFFF
 #define SECTOR_28_END       0x00077FFF
 #define SECTOR_29_END       0x0007FFFF
+
+
+
+extern uint32 result_table[5];
 
 void IAP_prepare_sector(uint32 start_sector,uint32 end_sector);
 void IAP_erase_sector(uint32 start_sector,uint32 end_sector);
