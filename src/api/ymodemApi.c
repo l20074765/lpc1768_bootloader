@@ -25,7 +25,6 @@ static	uint8		recvbuf[YMODEM_BUF_SIZE];
 static	uint8		wrFlashBuf[1024];
 static	uint16		wrFlashIndex = 0;
 
-
 uint8	    GucIapTmp[ IAP_BUF_LENGTH ] = "";
 uint32      IAP_Flash_Address    = 0x00006000;
 
@@ -54,7 +53,6 @@ uint8 IAPWriteData( uint8 *dataSrc, uint32 dataLen )
 	
 	__disable_irq();
 	memset( GucIapTmp, 0,   IAP_BUF_LENGTH );
-
 	memcpy( GucIapTmp, dataSrc, dataLen );
 	
 	if ( dataLen <= 4096ul ){
@@ -73,13 +71,7 @@ uint8 IAPWriteData( uint8 *dataSrc, uint32 dataLen )
 	
 	IAP_prepare_sector(USER_START_SECTOR, MAX_USER_SECTOR);
 	IAP_write_flash((uint32 *)IAP_Flash_Address,(uint8 *)GucIapTmp, writelen); // 写数据到扇区
-
-	
-
-
 	__enable_irq();
-
-
 	IAP_Flash_Address += writelen;
 
 	return 1;
@@ -88,22 +80,6 @@ uint8 IAPWriteData( uint8 *dataSrc, uint32 dataLen )
 
 
 
-
-void	UART1_RxPackage(void)
-{
-	uint32	j;	
-	RxCnt = 0;
-	for(j = 0;	j < 9300; j++)	
-	{
-		if(!uart0_IsEmpty())
-		{
-			recvbuf[RxCnt] = uart0_getChar();
-			if(++RxCnt >= 1032)	RxCnt = 0;
-			j = 0;	
-		}
-		
-	}
-}
 
 
 uint16 Str2Int(uint8 *inputstr)

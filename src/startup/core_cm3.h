@@ -24,58 +24,7 @@
 #ifndef __CM3_CORE_H__
 #define __CM3_CORE_H__
 
-/** @addtogroup CMSIS_CM3_core_LintCinfiguration CMSIS CM3 Core Lint Configuration
- *
- * List of Lint messages which will be suppressed and not shown:
- *   - Error 10: \n
- *     register uint32_t __regBasePri         __asm("basepri"); \n
- *     Error 10: Expecting ';'
- * .
- *   - Error 530: \n
- *     return(__regBasePri); \n
- *     Warning 530: Symbol '__regBasePri' (line 264) not initialized
- * .
- *   - Error 550: \n
- *     __regBasePri = (basePri & 0x1ff); \n
- *     Warning 550: Symbol '__regBasePri' (line 271) not accessed
- * .
- *   - Error 754: \n
- *     uint32_t RESERVED0[24]; \n
- *     Info 754: local structure member '<some, not used in the HAL>' (line 109, file ./cm3_core.h) not referenced
- * .
- *   - Error 750: \n
- *     #define __CM3_CORE_H__ \n
- *     Info 750: local macro '__CM3_CORE_H__' (line 43, file./cm3_core.h) not referenced
- * .
- *   - Error 528: \n
- *     static __INLINE void NVIC_DisableIRQ(uint32_t IRQn) \n
- *     Warning 528: Symbol 'NVIC_DisableIRQ(unsigned int)' (line 419, file ./cm3_core.h) not referenced
- * .
- *   - Error 751: \n
- *     } InterruptType_Type; \n
- *     Info 751: local typedef 'InterruptType_Type' (line 170, file ./cm3_core.h) not referenced
- * .
- * Note:  To re-enable a Message, insert a space before 'lint' *
- *
- */
 
-/*lint -save */
-/*lint -e10  */
-/*lint -e530 */
-/*lint -e550 */
-/*lint -e754 */
-/*lint -e750 */
-/*lint -e528 */
-/*lint -e751 */
-
-
-/** @addtogroup CMSIS_CM3_core_definitions CM3 Core Definitions
-  This file defines all structures and symbols for CMSIS core:
-    - CMSIS version number
-    - Cortex-M core registers and bitfields
-    - Cortex-M core peripheral base address
-  @{
- */
 
 #ifdef __cplusplus
  extern "C" {

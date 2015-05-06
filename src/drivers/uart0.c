@@ -62,11 +62,12 @@ void uart0_init (uint32 baud)
 * Output:               None
 * Return:               None
 *********************************************************************************************************/
-void uart0_isrHandler (void)
+void UART0_IRQHandler (void)
 {
 
 	uint8 i,temp;
-	//__disable_irq();      
+	//__disable_irq();  
+	
     while((LPC_UART0->IIR & 0x01) == 0)                          			//判断是否有中断挂起
 	{
         switch(LPC_UART0->IIR & 0x0E) 										//判断中断标志
